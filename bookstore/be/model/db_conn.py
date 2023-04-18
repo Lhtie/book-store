@@ -1,30 +1,18 @@
 from be.model import store
-
+from pymongo import MongoClient
 
 class DBConn:
     def __init__(self):
-        self.conn = store.get_db_conn()
+        self.mongodb = store.get_db_conn()
 
-    def user_id_exist(self, user_id):
-        cursor = self.conn.execute("SELECT user_id FROM user WHERE user_id = ?;", (user_id,))
-        row = cursor.fetchone()
-        if row is None:
-            return False
-        else:
-            return True
+    def user_id_exist(self, user_id: str) -> bool:
+        result = self.mongodb.user.find_one({"user_id": user_id})
+        return result is not None
 
-    def book_id_exist(self, store_id, book_id):
-        cursor = self.conn.execute("SELECT book_id FROM store WHERE store_id = ? AND book_id = ?;", (store_id, book_id))
-        row = cursor.fetchone()
-        if row is None:
-            return False
-        else:
-            return True
+    def book_id_exist(self, store_id: str, book_id: str) -> bool:
+        result = self.mongodb.store.find_one({"store_id": store_id, "book_id": book_id})
+        return result is not None
 
-    def store_id_exist(self, store_id):
-        cursor = self.conn.execute("SELECT store_id FROM user_store WHERE store_id = ?;", (store_id,))
-        row = cursor.fetchone()
-        if row is None:
-            return False
-        else:
-            return True
+    def store_id_exist(self, store_id: str) -> bool:
+        result = self.mongodb.user_store.find_one({"store_id": store_id})
+        return result is not None
