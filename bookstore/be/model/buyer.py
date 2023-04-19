@@ -8,7 +8,7 @@ from be.model import error
 class Buyer:
     def __init__(self):
         client = MongoClient('mongodb://localhost:27017/')
-        self.mongodb = client['bookstore']
+        self.mongodb = client['bookstore_database']
 
     def new_order(self, user_id: str, store_id: str, id_and_count: [(str, int)]) -> (int, str, str):
         order_id = ""

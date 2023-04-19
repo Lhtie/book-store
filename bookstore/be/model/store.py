@@ -6,7 +6,7 @@ from pymongo import MongoClient
 class Store:
     def __init__(self, db_path):
         self.client = MongoClient('mongodb://localhost:27017/')
-        self.mongodb = self.client['store_database']
+        self.mongodb = self.client['bookstore_database']
         self.init_tables()
 
     def init_tables(self):
@@ -31,6 +31,6 @@ def init_database(db_path):
     database_instance = Store(db_path)
 
 
-def get_db():
+def get_db_conn():
     global database_instance
     return database_instance.get_db()

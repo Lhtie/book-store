@@ -32,7 +32,7 @@ class BookDB:
     def __init__(self, large: bool = False):
         # 连接到MongoDB数据库
         self.client = MongoClient('mongodb://localhost:27017/')
-        self.mongodb = self.client['book_database']
+        self.mongodb = self.client['bookstore_database']
         self.book_collection = self.mongodb['book']
 
     def get_book_count(self):

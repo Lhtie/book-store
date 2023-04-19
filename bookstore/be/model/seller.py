@@ -6,7 +6,7 @@ class Seller:
 
     def __init__(self):
         client = MongoClient('mongodb://localhost:27017/')
-        self.mongodb = client['bookstore']
+        self.mongodb = client['bookstore_database']
 
     def add_book(self, user_id: str, store_id: str, book_id: str, book_json_str: str, stock_level: int):
         try:

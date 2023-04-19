@@ -8,7 +8,7 @@ sqlite_cursor = sqlite_conn.cursor()
 
 # 连接到MongoDB数据库
 mongo_client = MongoClient('mongodb://localhost:27017/')
-mongo_db = mongo_client['your_mongo_db_name']
+mongo_db = mongo_client['bookstore_database']
 
 book_collection = mongo_db['book']
 book_collection.delete_many({})
