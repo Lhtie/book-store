@@ -3,7 +3,7 @@ from pymongo import MongoClient
 
 class DBConn:
     def __init__(self):
-        self.mongodb = store.get_db_conn()
+        self.mongodb = store.get_db()
 
     def user_id_exist(self, user_id: str) -> bool:
         result = self.mongodb.user.find_one({"user_id": user_id})

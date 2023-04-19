@@ -41,6 +41,8 @@ class User(db_conn.DBConn):
 
     def register(self, user_id: str, password: str):
         try:
+            if self.user_id_exist(user_id):
+                raise error.error_exist_user_id(user_id)
             terminal = "terminal_{}".format(str(time.time()))
             token = jwt_encode(user_id, terminal)
             user_data = {

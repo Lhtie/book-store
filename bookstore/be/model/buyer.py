@@ -3,12 +3,12 @@ import uuid
 import json
 import logging
 from be.model import error
+from be.model import db_conn
 
 
-class Buyer:
+class Buyer(db_conn.DBConn):
     def __init__(self):
-        client = MongoClient('mongodb://localhost:27017/')
-        self.mongodb = client['bookstore_database']
+        db_conn.DBConn.__init__(self)
 
     def new_order(self, user_id: str, store_id: str, id_and_count: [(str, int)]) -> (int, str, str):
         order_id = ""
@@ -21,6 +21,7 @@ class Buyer:
 
             for book_id, count in id_and_count:
                 row = self.mongodb.store.find_one({"store_id": store_id, "book_id": book_id})
+                print(row)
                 if row is None:
                     return error.error_non_exist_book_id(book_id) + (order_id,)
 
