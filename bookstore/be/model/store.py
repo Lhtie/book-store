@@ -23,10 +23,9 @@ class Store:
             self.store = self.mongodb['store']
             self.new_order= self.mongodb['new_order']
             self.new_order_detail = self.mongodb['new_order_detail']
-            self.delete_all()
 
             # delete all documents
-            # self.delete_all()
+            self.delete_all()
         except Exception as e:
             logging.error(e)
 

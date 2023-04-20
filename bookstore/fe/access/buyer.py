@@ -68,3 +68,19 @@ class Buyer:
         r = requests.post(url, json=json)
         response_json = r.json()
         return r.status_code, response_json.get("result")
+    
+    def find(self, keys: list, sep: bool=False, page: int=0) -> (int, list):
+        json = {"keys": keys, "sep": sep, "page": page}
+        url = urljoin(self.url_prefix, "find")
+        headers = {"token": self.token}
+        r = requests.post(url, headers=headers, json=json)
+        response_json = r.json()
+        return r.status_code, response_json.get("books")
+    
+    def find_in_store(self, store_id: str, keys: list, sep: bool=False, page: int=0) -> (int, list):
+        json = {"store_id": store_id, "keys": keys, "sep": sep, "page": page}
+        url = urljoin(self.url_prefix, "find")
+        headers = {"token": self.token}
+        r = requests.post(url, headers=headers, json=json)
+        response_json = r.json()
+        return r.status_code, response_json.get("books")
