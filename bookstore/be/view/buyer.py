@@ -41,3 +41,21 @@ def add_funds():
     code, message = b.add_funds(user_id, password, add_value)
     return jsonify({"message": message}), code
 
+@bp_buyer.route("/find", methods=["POST"])
+def find():
+    keys = request.json.get("keys")
+    sep = request.json.get("sep")
+    page = request.json.get("page")
+    b = Buyer()
+    code, message, books = b.find(keys, sep, page)
+    return jsonify({"message": message, "books": books}), code
+
+@bp_buyer.route("/find_in_store", methods=["POST"])
+def find_in_store():
+    store_id = request.json.get("store_id")
+    keys = request.json.get("keys")
+    sep = request.json.get("sep")
+    page = request.json.get("page")
+    b = Buyer()
+    code, message, books = b.find_in_store(store_id, keys, sep, page)
+    return jsonify({"message": message, "books": books}), code
