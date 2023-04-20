@@ -16,3 +16,7 @@ class DBConn:
     def store_id_exist(self, store_id: str) -> bool:
         result = self.mongodb.user_store.find_one({"store_id": store_id})
         return result is not None
+    
+    # def new_order_id_exist(self, order_id: str) -> bool:
+    #     result = self.mongodb.new_order.find_one({"order_id": order_id})
+    #     return result is not None

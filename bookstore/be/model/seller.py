@@ -48,3 +48,22 @@ class Seller(db_conn.DBConn):
         except Exception as e:
             return 528, "{}".format(str(e))
         return 200, "ok"
+
+    def send_books(self, store_id:str ,order_id:str) -> int:
+        json={"store_id": store_id, "order_id": order_id}
+        url = urljoin(self.url_prefix, "send_books")
+        headers = {"token": self.token}
+        r = requests.post(url, headers=headers, json=json)
+        return r.status_code
+    
+    def store_processing_order(self, seller_id: str) -> (int, list):
+        json = {"seller_id": seller_id}
+        url = urljoin(self.url_prefix, "store_processing_order")
+        r = requests.post(url, json=json)
+        return r.status_code, r.json().get("result")
+    
+    def store_history_order(self, store_id: str) -> (int, list):
+        json = {"store_id": store_id}
+        url = urljoin(self.url_prefix, "store_history_order")
+        r = requests.post(url, json=json)
+        return r.status_code, r.json().get("result")
