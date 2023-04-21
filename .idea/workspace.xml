@@ -1,7 +1,16 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
+  <component name="AutoImportSettings">
+    <option name="autoReloadType" value="SELECTIVE" />
+  </component>
   <component name="ChangeListManager">
-    <list default="true" id="4e077d63-3a6e-488e-a40c-227c725b2783" name="Default Changelist" comment="" />
+    <list default="true" id="4e077d63-3a6e-488e-a40c-227c725b2783" name="Default Changelist" comment="">
+      <change beforePath="$PROJECT_DIR$/.idea/2022_cdms_pj2_require.iml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/2022_cdms_pj2_require.iml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/misc.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/misc.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/bookstore/fe/test/gen_book_data.py" beforeDir="false" afterPath="$PROJECT_DIR$/bookstore/fe/test/gen_book_data.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/bookstore/script/test.sh" beforeDir="false" afterPath="$PROJECT_DIR$/bookstore/script/test.sh" afterDir="false" />
+    </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -14,20 +23,29 @@
       </list>
     </option>
   </component>
+  <component name="Git.Settings">
+    <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
+  </component>
+  <component name="MarkdownSettingsMigration">
+    <option name="stateVersion" value="1" />
+  </component>
   <component name="ProjectId" id="2MwWf6RNy7poYoLSnHfvcw8NK1W" />
   <component name="ProjectViewState">
     <option name="hideEmptyMiddlePackages" value="true" />
-    <option name="showExcludedFiles" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent">
-    <property name="RunOnceActivity.ShowReadmeOnStart" value="true" />
-  </component>
+  <component name="PropertiesComponent">{
+  &quot;keyToString&quot;: {
+    &quot;last_opened_file_path&quot;: &quot;D:/miniconda/Scripts/conda.exe&quot;,
+    &quot;settings.editor.selected.configurable&quot;: &quot;com.jetbrains.python.configuration.PyActiveSdkModuleConfigurable&quot;
+  }
+}</component>
   <component name="RecentsManager">
     <key name="MoveFile.RECENT_KEYS">
       <recent name="$PROJECT_DIR$/bookstore" />
     </key>
   </component>
+  <component name="SpellCheckerSettings" RuntimeDictionaries="0" Folders="0" CustomDictionaries="0" DefaultDictionary="application-level" UseSingleDictionary="true" transferred="true" />
   <component name="SvnConfiguration">
     <configuration />
   </component>
@@ -40,12 +58,5 @@
       <updated>1678679224583</updated>
     </task>
     <servers />
-  </component>
-  <component name="WindowStateProjectService">
-    <state x="623" y="307" key="com.intellij.ide.util.TipDialog" timestamp="1678841844207">
-      <screen x="0" y="0" width="1440" height="900" />
-    </state>
-    <state x="623" y="307" key="com.intellij.ide.util.TipDialog/0.0.1440.900@0.0.1440.900" timestamp="1678841844207" />
-    <state x="598" y="-695" key="com.intellij.ide.util.TipDialog/0.25.1440.774/-232.-1055.1920.1055@-232.-1055.1920.1055" timestamp="1678679236325" />
   </component>
 </project>
