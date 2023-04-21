@@ -23,6 +23,7 @@ class Store:
             self.store = self.mongodb['store']
             self.new_order= self.mongodb['new_order']
             self.new_order_detail = self.mongodb['new_order_detail']
+            self.history_order = self.mongodb['history_order']
 
             # delete all documents
             self.delete_all()

@@ -49,21 +49,19 @@ class Seller(db_conn.DBConn):
             return 528, "{}".format(str(e))
         return 200, "ok"
 
-    def send_books(self, store_id:str ,order_id:str) -> int:
-        json={"store_id": store_id, "order_id": order_id}
-        url = urljoin(self.url_prefix, "send_books")
-        headers = {"token": self.token}
-        r = requests.post(url, headers=headers, json=json)
-        return r.status_code
-    
-    def store_processing_order(self, seller_id: str) -> (int, list):
-        json = {"seller_id": seller_id}
-        url = urljoin(self.url_prefix, "store_processing_order")
-        r = requests.post(url, json=json)
-        return r.status_code, r.json().get("result")
-    
-    def store_history_order(self, store_id: str) -> (int, list):
-        json = {"store_id": store_id}
-        url = urljoin(self.url_prefix, "store_history_order")
-        r = requests.post(url, json=json)
-        return r.status_code, r.json().get("result")
+    def send_books(self,store_id,order_id):
+        try:
+            if not self.store_id_exist(store_id):
+                return error.error_non_exist_store_id(store_id)
+            row = self.mongodb.new_order.find_one({"order_id": order_id})
+            if row is None:
+                return error.error_invalid_order_id(order_id)
+            
+            status = row["status"]
+            if status != 2:
+                return error.error_invalid_order_status(order_id)
+
+            self.mongodb.new_order.update_one({"order_id": order_id}, {"status": 3})
+        except BaseException as e:
+            return 530, "{}".format(str(e))
+        return 200, "ok"
