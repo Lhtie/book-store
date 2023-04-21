@@ -24,6 +24,7 @@ class Store:
             self.store = self.mongodb['store']
             self.new_order= self.mongodb['new_order']
             self.new_order_detail = self.mongodb['new_order_detail']
+            self.history_order = self.mongodb['history_order']
             self.inverted_index = self.mongodb['invert_index']
 
             # delete all documents

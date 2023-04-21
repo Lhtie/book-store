@@ -48,7 +48,7 @@ class Buyer:
         r = requests.post(url, headers=headers, json=json)
         return r.status_code
     
-    def cancel(self, buyer_id:str, order_id:str) -> int:
+    def cancel_order(self, buyer_id:str, order_id:str) -> int:
         json={"buyer_id": buyer_id, "order_id": order_id}
         url = urljoin(self.url_prefix, "cancel_order")
         headers = {"token": self.token}
@@ -58,14 +58,16 @@ class Buyer:
     def query_new_order(self, user_id:str) -> (int, list):
         json = {"user_id": user_id}
         url = urljoin(self.url_prefix, "query_new_order")
-        r = requests.post(url, json=json)
+        headers = {"token": self.token}
+        r = requests.post(url, headers=headers, json=json)
         response_json = r.json()
         return r.status_code, response_json.get("result")
 
     def query_history_order(self, user_id: str) -> (int, list):
         json = {"user_id": user_id}
         url = urljoin(self.url_prefix, "query_history_order")
-        r = requests.post(url, json=json)
+        headers = {"token": self.token}
+        r = requests.post(url, headers=headers, json=json)
         response_json = r.json()
         return r.status_code, response_json.get("result")
     
