@@ -31,3 +31,18 @@ code = buyer.add_funds(total_price)
 assert code == 200
 code = buyer.payment(order_id)
 assert code == 200
+
+seller = register_new_seller(seller_id, password)
+code = seller.create_store(store_id)
+assert code == 200
+book_db = book.BookDB()
+books = book_db.get_book_info(0, 50)
+
+for b in books:
+    code = seller.add_book(store_id, 0, b)
+    assert code == 200
+
+print("started")
+code, selected = buyer.find(["小说", "中国"], sep=True, page=1)
+for book in selected:
+    print(book["title"])

@@ -31,7 +31,6 @@ def payment():
     code, message = b.payment(user_id, password, order_id)
     return jsonify({"message": message}), code
 
-
 @bp_buyer.route("/add_funds", methods=["POST"])
 def add_funds():
     user_id = request.json.get("user_id")
@@ -72,3 +71,22 @@ def query_history_order():
     b = Buyer()
     code, message, result = b.query_history_order(user_id=user_id)
     return jsonify({"message": message, "result": result}), code
+    
+@bp_buyer.route("/find", methods=["POST"])
+def find():
+    keys = request.json.get("keys")
+    sep = request.json.get("sep")
+    page = request.json.get("page")
+    b = Buyer()
+    code, message, books = b.find(keys, sep, page)
+    return jsonify({"message": message, "books": books}), code
+
+@bp_buyer.route("/find_in_store", methods=["POST"])
+def find_in_store():
+    store_id = request.json.get("store_id")
+    keys = request.json.get("keys")
+    sep = request.json.get("sep")
+    page = request.json.get("page")
+    b = Buyer()
+    code, message, books = b.find_in_store(store_id, keys, sep, page)
+    return jsonify({"message": message, "books": books}), code

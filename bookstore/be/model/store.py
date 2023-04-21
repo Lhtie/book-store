@@ -15,6 +15,7 @@ class Store:
         self.store.delete_many({})
         self.new_order.delete_many({})
         self.new_order_detail.delete_many({})
+        self.inverted_index.delete_many({})
 
     def init_tables(self):
         try:
@@ -24,9 +25,13 @@ class Store:
             self.new_order= self.mongodb['new_order']
             self.new_order_detail = self.mongodb['new_order_detail']
             self.history_order = self.mongodb['history_order']
+            self.inverted_index = self.mongodb['invert_index']
 
             # delete all documents
             self.delete_all()
+
+            # create index on invert_index
+            self.inverted_index.create_index({"key_ctx": 1})
         except Exception as e:
             logging.error(e)
 
