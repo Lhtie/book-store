@@ -88,8 +88,7 @@ class Buyer(db_conn.DBConn):
 
             self.mongodb.user.update_one({"user_id": buyer_id, "balance": {"$gte": total_price}},
                                          {"$inc": {"balance": -total_price}})
-            self.mongodb.new_order.update_one({"order_id": order_id}, {"status": 2})
-
+            self.mongodb.new_order.update_one({"order_id": order_id}, {"$set":{"status": 2}})
             delete_unpaid_order(order_id)
 
         except Exception as e:

@@ -1,4 +1,3 @@
-# 配置定时任务
 class Config(object):
     JOBS = [
         {

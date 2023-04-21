@@ -61,7 +61,7 @@ class Seller(db_conn.DBConn):
             if status != 2:
                 return error.error_invalid_order_status(order_id)
 
-            self.mongodb.new_order.update_one({"order_id": order_id}, {"status": 3})
+            self.mongodb.new_order.update_one({"order_id": order_id}, {"$set": {"status": 3}})
         except BaseException as e:
             return 530, "{}".format(str(e))
         return 200, "ok"
