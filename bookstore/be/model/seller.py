@@ -64,6 +64,7 @@ class Seller(db_conn.DBConn):
             self.mongodb.inverted_index.insert_many(ctx)
 
         except Exception as e:
+            print(str(e))
             return 528, "{}".format(str(e))
         return 200, "ok"
 

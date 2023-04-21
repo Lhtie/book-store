@@ -1,17 +1,10 @@
-import jieba
-import os
-
-stopwords_files = ["baidu_stopwords.txt", "cn_stopwords.txt", "hit_stopwords.txt", "scu_stopwords.txt"]
+import jieba.posseg as pseg
+from be.model.stopwords import stopwords
 
 class Tokenizer():
     def __init__(self):
-        this_path = os.path.abspath(__file__)
-        this_dir = os.path.dirname(this_path)
-        self.stop_words = set()
-        for file in stopwords_files:
-            with open(os.path.join(this_dir, "stopwords", file), "r", encoding="utf-8") as f:
-                words = [word.strip() for word in f.readlines()]
-                self.stop_words.update(set(words))
+        self.stop_words = stopwords
+        self.tokenizer = pseg.POSTokenizer(tokenizer=pseg.dt)
 
     def parse_author(self, author: str) -> (int, str):
         if not isinstance(author, str):
@@ -33,11 +26,12 @@ class Tokenizer():
         sentences = raw.split('\n')
         tokens_set = set()
         for sent in sentences:
-            raw_tokens = jieba.cut(sent, cut_all=False)
+            raw_tokens = self.tokenizer.cut(sent)
             tokens = []
-            for token in raw_tokens:
+            for token, flag in raw_tokens:
                 token = token.strip()
                 if not token in self.stop_words:
-                    tokens.append(token)
+                    if flag in ["n", "nr", "nz", "ns", "nt", "nw"]:
+                        tokens.append(token)
             tokens_set.update(set(tokens))
         return list(tokens_set)
