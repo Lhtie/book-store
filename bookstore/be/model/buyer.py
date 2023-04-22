@@ -182,7 +182,7 @@ class Buyer(db_conn.DBConn):
 
             result = []
             cursor = self.mongodb.new_order.find({"user_id": user_id})
-            if len(cursor) != 0:
+            if len(list(cursor)) != 0:
                 for row in cursor:
                     order = {
                         "order_id": row["order_id"],

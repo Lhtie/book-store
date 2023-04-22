@@ -47,7 +47,7 @@ def be_run():
     app.register_blueprint(buyer.bp_buyer)
 
     sched = APScheduler()
-    sched.add_job('every_30_seconds', time_exceed_delete, trigger='interval', seconds=30)
+    sched.add_job('every_5_seconds', time_exceed_delete, trigger='interval', seconds=5)
     sched.start()
     print("Settings: Auto Cancel Out Of Time Orders")
 
