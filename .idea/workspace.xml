@@ -7,7 +7,6 @@
     <list default="true" id="4e077d63-3a6e-488e-a40c-227c725b2783" name="Default Changelist" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/bookstore/fe/test/test_orders.py" beforeDir="false" afterPath="$PROJECT_DIR$/bookstore/fe/test/test_orders.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/bookstore/fe/test/test_send_receive.py" beforeDir="false" afterPath="$PROJECT_DIR$/bookstore/fe/test/test_send_receive.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />

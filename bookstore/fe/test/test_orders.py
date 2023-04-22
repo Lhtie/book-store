@@ -37,15 +37,21 @@ class TestOrders:
         yield
 
     def test_cancel_order_ok(self):
-        code = self.buyer.cancel(self.buyer_id, self.order_id)
+        code = self.buyer.cancel_order(self.buyer_id, self.order_id)
         assert code == 200
+
+    def test_cancel_order_repeat(self):
+        code = self.buyer.cancel_order(self.buyer_id, self.order_id)
+        assert code == 200
+        code = self.buyer.cancel_order(self.buyer_id, self.order_id)
+        assert code != 200
 
     def test_cancel_order_after_payment(self):
         code = self.buyer.add_funds(self.total_price)
         assert code == 200
         code = self.buyer.payment(self.order_id)
         assert code == 200
-        code = self.buyer.cancel(self.buyer_id, self.order_id)
+        code = self.buyer.cancel_order(self.buyer_id, self.order_id)
         assert code != 200
 
     def test_cancel_order_after_send(self):
@@ -55,7 +61,7 @@ class TestOrders:
         assert code == 200
         code = self.seller.send_books(self.store_id, self.order_id)
         assert code == 200
-        code = self.buyer.cancel(self.buyer_id, self.order_id)
+        code = self.buyer.cancel_order(self.buyer_id, self.order_id)
         assert code != 200
 
     def test_cancel_order_after_receive(self):
@@ -67,15 +73,15 @@ class TestOrders:
         assert code == 200
         code = self.buyer.receive_books(self.buyer_id, self.password, self.order_id)
         assert code == 200
-        code = self.buyer.cancel(self.buyer_id, self.order_id)
+        code = self.buyer.cancel_order(self.buyer_id, self.order_id)
         assert code != 200
 
     def test_cancel_non_exist_buyer_id(self):
-        code = self.buyer.cancel(self.buyer_id + "_x", self.order_id)
+        code = self.buyer.cancel_order(self.buyer_id + "_x", self.order_id)
         assert code != 200
 
     def test_cancel_non_exist_order_id(self):
-        code = self.buyer.cancel(self.buyer_id, self.order_id + "_x")
+        code = self.buyer.cancel_order(self.buyer_id, self.order_id + "_x")
         assert code != 200
 
     def query_new_order(self):
