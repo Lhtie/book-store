@@ -16,6 +16,15 @@ class Store:
         self.new_order.delete_many({})
         self.new_order_detail.delete_many({})
         self.inverted_index.delete_many({})
+    
+    def create_index(self):
+        self.user.create_index({"user_id": 1})
+        self.user_store.create_index({"store_id": 1})
+        self.store.create_index({"store_id": 1, "book_id": 1})
+        self.new_order.create_index({"order_id": 1})
+        self.new_order_detail.create_index({"order_id": 1, "book_id": 1})
+        self.history_order.create_index({"order_id": 1})
+        self.inverted_index.create_index({"key_ctx": 1})
 
     def init_tables(self):
         try:
@@ -31,7 +40,7 @@ class Store:
             self.delete_all()
 
             # create index on invert_index
-            self.inverted_index.create_index({"key_ctx": 1})
+            self.create_index()
         except Exception as e:
             logging.error(e)
 
