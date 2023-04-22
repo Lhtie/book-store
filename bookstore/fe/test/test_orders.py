@@ -6,6 +6,7 @@ from fe.access.new_buyer import register_new_buyer
 from fe.access.new_seller import register_new_seller
 from fe.access.book import Book
 import uuid
+import time
 
 
 class TestOrders:
@@ -38,6 +39,10 @@ class TestOrders:
 
     def test_cancel_order_ok(self):
         code = self.buyer.cancel_order(self.buyer_id, self.order_id)
+        assert code == 200
+        code, result = self.buyer.query_new_order(self.buyer_id)
+        assert result == ["NO Order is Processing"]
+        code, result = self.buyer.query_history_order(self.buyer_id)
         assert code == 200
 
     def test_cancel_order_repeat(self):
@@ -83,6 +88,13 @@ class TestOrders:
     def test_cancel_non_exist_order_id(self):
         code = self.buyer.cancel_order(self.buyer_id, self.order_id + "_x")
         assert code != 200
+
+    def test_auto_cancel_ok(self):
+        time.sleep(62)
+        code, result = self.buyer.query_new_order(self.buyer_id)
+        assert result == ["NO Order is Processing"]
+        code, result = self.buyer.query_history_order(self.buyer_id)
+        assert code == 200
 
     def query_new_order(self):
         code, result = self.buyer.query_new_order(self.buyer_id)
