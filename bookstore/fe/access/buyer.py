@@ -81,7 +81,7 @@ class Buyer:
     
     def find_in_store(self, store_id: str, keys: list, sep: bool=False, page: int=0) -> (int, list):
         json = {"store_id": store_id, "keys": keys, "sep": sep, "page": page}
-        url = urljoin(self.url_prefix, "find")
+        url = urljoin(self.url_prefix, "find_in_store")
         headers = {"token": self.token}
         r = requests.post(url, headers=headers, json=json)
         response_json = r.json()

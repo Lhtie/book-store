@@ -8,3 +8,4 @@ pytest
 PyJWT
 requests
 jieba
+Flask_apscheduler

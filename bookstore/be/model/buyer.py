@@ -25,7 +25,6 @@ class Buyer(db_conn.DBConn):
             total_price = 0
             for book_id, count in id_and_count:
                 row = self.mongodb.store.find_one({"store_id": store_id, "book_id": book_id})
-                print(row)
                 if row is None:
                     return error.error_non_exist_book_id(book_id) + (order_id,)
 
@@ -179,7 +178,7 @@ class Buyer(db_conn.DBConn):
     def query_new_order(self, user_id):
         try:
             if not self.user_id_exist(user_id):
-                return error.error_non_exist_user_id(user_id)
+                raise error.error_non_exist_user_id(user_id)
 
             result = []
             cursor = self.mongodb.new_order.find({"user_id": user_id})
@@ -211,7 +210,7 @@ class Buyer(db_conn.DBConn):
     def query_history_order(self, user_id):
         try:
             if not self.user_id_exist(user_id):
-                return error.error_non_exist_user_id(user_id)
+                raise error.error_non_exist_user_id(user_id)
 
             result = []
             orders = self.mongodb.history_order.find({'user_id': user_id},{'_id':0})
@@ -223,7 +222,7 @@ class Buyer(db_conn.DBConn):
         return 200, "ok", result
     
     # store_id: if not None, retrieve books stored in store_id
-    def find_one_key(self, key: str, store_id: str=None) -> (int, str, set):
+    def __find_one_key(self, key: str, store_id: str=None) -> (int, str, set):
         try:
             if store_id is None:
                 row = self.mongodb.inverted_index.find({"key_ctx": key})
@@ -234,15 +233,15 @@ class Buyer(db_conn.DBConn):
                 book_ids.append(each["book_id"])
 
         except Exception as e:
-            return 528, "{}".format(str(e)), None
+            return 528, "{}".format(str(e)), set()
 
         return 200, "ok", set(book_ids)
     
-    def find_book_ids(self, keys: list, sep: bool, page: int, store_id: str=None) -> (int, str, list):
+    def __find_book_ids(self, keys: list, sep: bool, page: int, store_id: str=None) -> (int, str, list):
         try:
             book_ids = set()
             for key in keys:
-                code, _, upds = self.find_one_key(key, store_id)
+                code, _, upds = self.__find_one_key(key, store_id)
                 if code == 200:
                     book_ids.update(upds)
             book_ids = list(sorted(book_ids))
@@ -254,45 +253,45 @@ class Buyer(db_conn.DBConn):
                     book_ids = book_ids[off:min(len(book_ids), off+self.page_size)]
 
         except Exception as e:
-            return 528, "{}".format(str(e))
+            return 528, "{}".format(str(e)), []
         
         return 200, "ok", book_ids
 
     def find(self, keys: list, sep: bool, page: int) -> (int, str, list):
         try:
-            code, msg, book_ids = self.find_book_ids(keys, sep, page)
+            code, msg, book_ids = self.__find_book_ids(keys, sep, page)
             if code != 200:
-                return error.error_and_message(code, msg)
+                raise error.error_and_message(code, msg)
 
             book_infos = []
             for book_id in book_ids:
                 row = self.mongodb.store.find_one({"book_id": book_id})
                 if row is None:
-                    return error.error_non_exist_book_id(book_id)
+                    raise error.error_non_exist_book_id(book_id)
                 book_infos.append(json.loads(row["book_info"]))
 
         except Exception as e:
-            return 528, "{}".format(str(e))
+            return 528, "{}".format(str(e)), []
         
         return 200, "ok", book_infos
     
     def find_in_store(self, store_id: str, keys: list, sep: bool, page: int) -> (int, str, list):
         try:
             if not self.store_id_exist(store_id):
-                return error.error_non_exist_store_id(store_id)
+                raise error.error_non_exist_store_id(store_id)
 
-            code, msg, book_ids = self.find_book_ids(keys, sep, page, store_id)
+            code, msg, book_ids = self.__find_book_ids(keys, sep, page, store_id)
             if code != 200:
-                return error.error_and_message(code, msg)
+                raise error.error_and_message(code, msg)
 
             book_infos = []
             for book_id in book_ids:
                 row = self.mongodb.store.find_one({"store_id": store_id, "book_id": book_id})
                 if row is None:
-                    return error.error_non_exist_book_id(book_id)
+                    raise error.error_non_exist_book_id(book_id)
                 book_infos.append(json.loads(row["book_info"]).update(stock_level=row["stock_level"]))
 
         except Exception as e:
-            return 528, "{}".format(str(e))
+            return 528, "{}".format(str(e)), []
         
         return 200, "ok", book_infos

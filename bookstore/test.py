@@ -3,6 +3,7 @@ import pytest
 from fe.access.buyer import Buyer
 from fe.test.gen_book_data import GenBook
 from fe.access.new_buyer import register_new_buyer
+from fe.access.new_seller import register_new_seller
 from fe.access.book import Book
 import uuid
 
@@ -32,17 +33,8 @@ assert code == 200
 code = buyer.payment(order_id)
 assert code == 200
 
-seller = register_new_seller(seller_id, password)
-code = seller.create_store(store_id)
-assert code == 200
-book_db = book.BookDB()
-books = book_db.get_book_info(0, 50)
-
-for b in books:
-    code = seller.add_book(store_id, 0, b)
-    assert code == 200
-
 print("started")
-code, selected = buyer.find(["小说", "中国"], sep=True, page=1)
+code, selected = buyer.find(keys=["数学", "美丽", "三毛"], sep=False, page=0)
+print("code =", code)
 for book in selected:
     print(book["title"])
