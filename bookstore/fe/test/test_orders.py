@@ -108,16 +108,14 @@ class TestOrders:
         code = self.buyer.receive_books(self.buyer_id, self.password, self.order_id)
         assert code == 200
 
-        #TO DO: return what?
         code, result = self.buyer.query_new_order(self.buyer_id)
-        assert code != 200
+        assert result == ["NO Order is Processing"]
 
     def query_new_order_non_exist_buyer_id(self):
         code, result = self.buyer.query_new_order(self.buyer_id + "_x")
         assert code != 200
 
     def query_history_order(self):
-        # TO DO: return what?
         code, result = self.buyer.query_history_order(self.buyer_id)
         assert result == []
 
