@@ -15,7 +15,6 @@ class TestOrders:
         self.store_id = "test_orders_store_id_{}".format(str(uuid.uuid1()))
         self.buyer_id = "test_orders_buyer_id_{}".format(str(uuid.uuid1()))
         self.password = self.seller_id
-        self.buyer = register_new_buyer(self.buyer_id, self.password)
         # self.seller = register_new_seller(self.seller_id, self.password)
         gen_book = GenBook(self.seller_id, self.store_id)
         ok, buy_book_id_list = gen_book.gen(non_exist_book_id=False, low_stock_level=False, max_book_count=5)

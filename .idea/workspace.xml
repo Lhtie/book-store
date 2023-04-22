@@ -5,11 +5,9 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="4e077d63-3a6e-488e-a40c-227c725b2783" name="Default Changelist" comment="">
-      <change beforePath="$PROJECT_DIR$/.idea/2022_cdms_pj2_require.iml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/2022_cdms_pj2_require.iml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/misc.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/misc.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/bookstore/fe/test/gen_book_data.py" beforeDir="false" afterPath="$PROJECT_DIR$/bookstore/fe/test/gen_book_data.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/bookstore/script/test.sh" beforeDir="false" afterPath="$PROJECT_DIR$/bookstore/script/test.sh" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/bookstore/fe/test/test_orders.py" beforeDir="false" afterPath="$PROJECT_DIR$/bookstore/fe/test/test_orders.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/bookstore/fe/test/test_send_receive.py" beforeDir="false" afterPath="$PROJECT_DIR$/bookstore/fe/test/test_send_receive.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
