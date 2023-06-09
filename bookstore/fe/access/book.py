@@ -3,7 +3,6 @@ import sqlite3 as sqlite
 import random
 import base64
 import simplejson as json
-from pymongo import MongoClient
 
 
 class Book:
@@ -31,39 +30,53 @@ class Book:
 
 class BookDB:
     def __init__(self, large: bool = False):
-        # 连接到MongoDB数据库
-        self.client = MongoClient('mongodb://localhost:27017/')
-        self.mongodb = self.client['bookstore_database']
-        self.book_collection = self.mongodb['book']
+        parent_path = os.path.dirname(os.path.dirname(__file__))
+        self.db_s = os.path.join(parent_path, "data/book.db")
+        self.db_l = os.path.join(parent_path, "data/book_lx.db")
+        if large:
+            self.book_db = self.db_l
+        else:
+            self.book_db = self.db_s
 
     def get_book_count(self):
-        return self.book_collection.count_documents({})
+        conn = sqlite.connect(self.book_db)
+        cursor = conn.execute(
+            "SELECT count(id) FROM book")
+        row = cursor.fetchone()
+        return row[0]
 
     def get_book_info(self, start, size) -> [Book]:
         books = []
-        cursor = self.book_collection.find().skip(start).limit(size)
-        
+        conn = sqlite.connect(self.book_db)
+        cursor = conn.execute(
+            "SELECT id, title, author, "
+            "publisher, original_title, "
+            "translator, pub_year, pages, "
+            "price, currency_unit, binding, "
+            "isbn, author_intro, book_intro, "
+            "content, tags, picture FROM book ORDER BY id "
+            "LIMIT ? OFFSET ?", (size, start))
         for row in cursor:
             book = Book()
-            book.id = row['id']
-            book.title = row['title']
-            book.author = row['author']
-            book.publisher = row['publisher']
-            book.original_title = row['original_title']
-            book.translator = row['translator']
-            book.pub_year = row['pub_year']
-            book.pages = row['pages']
-            book.price = row['price']
+            book.id = row[0]
+            book.title = row[1]
+            book.author = row[2]
+            book.publisher = row[3]
+            book.original_title = row[4]
+            book.translator = row[5]
+            book.pub_year = row[6]
+            book.pages = row[7]
+            book.price = row[8]
 
-            book.currency_unit = row['currency_unit']
-            book.binding = row['binding']
-            book.isbn = row['isbn']
-            book.author_intro = row['author_intro']
-            book.book_intro = row['book_intro']
-            book.content = row['content']
-            tags = row['tags']
+            book.currency_unit = row[9]
+            book.binding = row[10]
+            book.isbn = row[11]
+            book.author_intro = row[12]
+            book.book_intro = row[13]
+            book.content = row[14]
+            tags = row[15]
 
-            picture = row['picture']
+            picture = row[16]
 
             for tag in tags.split("\n"):
                 if tag.strip() != "":

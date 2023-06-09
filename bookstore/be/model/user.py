@@ -3,7 +3,7 @@ import time
 import logging
 from be.model import error
 from be.model import db_conn
-
+from be.model import store
 
 def jwt_encode(user_id: str, terminal: str) -> str:
     encoded = jwt.encode(
@@ -45,36 +45,45 @@ class User(db_conn.DBConn):
                 raise error.error_exist_user_id(user_id)
             terminal = "terminal_{}".format(str(time.time()))
             token = jwt_encode(user_id, terminal)
-            user_data = {
-                "user_id": user_id,
-                "password": password,
-                "balance": 0,
-                "token": token,
-                "terminal": terminal
-            }
-            self.mongodb.user.insert_one(user_data)
+
+            user_data = store.User_Table(
+                user_id=user_id,
+                password=password,
+                balance=0,
+                token=token,
+                terminal=terminal
+            )
+            self.db.insert(user_data)
+
         except Exception as e:
             logging.error(str(e))
             return error.error_exist_user_id(user_id)
         return 200, "ok"
 
     def check_token(self, user_id: str, token: str) -> (int, str):
-        user = self.mongodb.user.find_one({"user_id": user_id})
+        session = self.db.DbSession()
+        user = session.query(store.User_Table).filter_by(user_id=user_id).first()
         if user is None:
+            session.close()
             return error.error_authorization_fail()
-        db_token = user['token']
+        db_token = user.token
+        session.close()
         if not self.__check_token(user_id, db_token, token):
             return error.error_authorization_fail()
         return 200, "ok"
 
     def check_password(self, user_id: str, password: str) -> (int, str):
-        user = self.mongodb.user.find_one({"user_id": user_id})
+        session = self.db.DbSession()
+        user = session.query(store.User_Table).filter_by(user_id=user_id).first()
         if user is None:
+            session.close()
             return error.error_authorization_fail()
 
-        if password != user['password']:
+        if password != user.password:
+            session.close()
             return error.error_authorization_fail()
-
+        
+        session.close()
         return 200, "ok"
 
     def login(self, user_id: str, password: str, terminal: str) -> (int, str, str):
@@ -85,9 +94,12 @@ class User(db_conn.DBConn):
                 return code, message, ""
 
             token = jwt_encode(user_id, terminal)
-            update_result = self.mongodb.user.update_one({"user_id": user_id},
-                                                         {"$set": {"token": token, "terminal": terminal}})
-            if update_result.matched_count == 0:
+            session = self.db.DbSession()
+            update_result = session.query(store.User_Table).filter_by(user_id=user_id)\
+                                    .update({"token": token, "terminal": terminal})
+            session.commit()
+            session.close()
+            if update_result == 0:
                 return error.error_authorization_fail() + ("", )
         except Exception as e:
             return 528, "{}".format(str(e)), ""
@@ -102,9 +114,12 @@ class User(db_conn.DBConn):
             terminal = "terminal_{}".format(str(time.time()))
             dummy_token = jwt_encode(user_id, terminal)
 
-            update_result = self.mongodb.user.update_one({"user_id": user_id},
-                                                         {"$set": {"token": dummy_token, "terminal": terminal}})
-            if update_result.matched_count == 0:
+            session = self.db.DbSession()
+            update_result = session.query(store.User_Table).filter_by(user_id=user_id)\
+                                    .update({"token": dummy_token, "terminal": terminal})
+            session.commit()
+            session.close()
+            if update_result == 0:
                 return error.error_authorization_fail()
         except Exception as e:
             return 528, "{}".format(str(e))
@@ -116,8 +131,10 @@ class User(db_conn.DBConn):
             if code != 200:
                 return code, message
 
-            delete_result = self.mongodb.user.delete_one({"user_id": user_id})
-            if delete_result.deleted_count != 1:
+            session = self.db.DbSession()
+            delete_result = session.query(store.User_Table).filter_by(user_id=user_id).delete()
+            session.commit()
+            if delete_result != 1:
                 return error.error_authorization_fail()
         except Exception as e:
             return 528, "{}".format(str(e))
@@ -131,11 +148,15 @@ class User(db_conn.DBConn):
 
             terminal = "terminal_{}".format(str(time.time()))
             token = jwt_encode(user_id, terminal)
-            update_result = self.mongodb.user.update_one({"user_id": user_id},
-                                                         {"$set": {"password": new_password,
-                                                                   "token": token,
-                                                                   "terminal": terminal}})
-            if update_result.matched_count == 0:
+
+            session = self.db.DbSession()
+            update_result = session.query(store.User_Table).filter_by(user_id=user_id)\
+                                    .update({"password": new_password,
+                                                "token": token,
+                                                "terminal": terminal})
+            session.commit()
+            session.close()
+            if update_result == 0:
                 return error.error_authorization_fail()
         except Exception as e:
             return 528, "{}".format(str(e))

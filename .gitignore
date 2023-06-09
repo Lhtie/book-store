@@ -2,7 +2,6 @@
 *.pyc
 */__pycache__
 bookstore/.coverage
-bookstore/mongodb_data
 bookstore/bookstore.egg-info
 bookstore/build
 bookstore/dist

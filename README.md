@@ -2,6 +2,10 @@
 [![Build Status](https://travis-ci.com/DaSE-DBMS/bookstore.svg?branch=master)](https://travis-ci.com/DaSE-DBMS/bookstore)
 [![codecov](https://codecov.io/gh/DaSE-DBMS/bookstore/branch/master/graph/badge.svg)](https://codecov.io/gh/DaSE-DBMS/bookstore)
 
+## 简介
+在第一次大作业的基础上修改，通过sql以及orm的方式实现第一次作业的全部功能（包括前60%和后40%）。<br>
+可在第一次作业的成品上修改也可从第一次作业的入口重新下载作业资源。<br>
+此次作业为个人作业，一个人一组。<br>
 
 ## 功能
 
@@ -56,7 +60,7 @@ bookstore
             |-- book.db                 sqlite 数据库(book.db，较少量的测试数据)
             |-- book_lx.db              sqlite 数据库(book_lx.db， 较大量的测试数据，要从网盘下载)
             |-- scraper.py              从豆瓣爬取的图书信息数据的代码
-        |-- test                      功能性测试（包含对前60%功能的测试，不要修改已有的文件，可以提pull request或bug）
+        |-- test                      功能性测试（包含对60%功能的测试，不要修改已有的文件，可以提pull request或bug）
         |-- conf.py                   测试参数，修改这个文件以适应自己的需要
         |-- conftest.py               pytest初始化配置，修改这个文件以适应自己的需要
         |-- ....
@@ -66,7 +70,6 @@ bookstore
 
 ## 安装配置
 安装python (需要python3.6以上) 
-
 
 进入bookstore文件夹下：
 
@@ -78,42 +81,50 @@ bookstore
     
     bash script/test.sh
 
-（注意：如果提示"RuntimeError: Not running with the Werkzeug Server"，请输入下述命令，将flask和Werkzeug的版本均降低为2.0.0。  
+bookstore/fe/data/book.db中包含测试的数据，从豆瓣网抓取的图书信息，其DDL为：
+ 
+    create table book
+    (
+        id TEXT primary key,
+        title TEXT,
+        author TEXT,
+        publisher TEXT,
+        original_title TEXT,
+        translator TEXT,
+        pub_year TEXT,
+        pages INTEGER,
+        price INTEGER,
+        currency_unit TEXT,
+        binding TEXT,
+        isbn TEXT,
+        author_intro TEXT,
+        book_intro text,
+        content TEXT,
+        tags TEXT,
+        picture BLOB
+    );
 
-     pip install flask==2.0.0  
-
-     pip install Werkzeug==2.0.0）
 
 ## 要求
 
-2～3人一组，做好分工，完成下述内容：
+一人一组，做好分工，完成下述内容：
 
-1.bookstore文件夹是该项目的demo，采用flask后端框架与sqlite数据库，实现了前60%功能以及对应的测试用例代码。
-要求大家创建本地MongoDB数据库，将bookstore/fe/data/book.db中的内容以合适的形式存入本地数据库 
+1.bookstore文件夹是该项目的demo，采用flask后端框架与sqlite数据库，实现了前60%功能以及对应的测试用例代码。要求利用ORM使用postgreSQL数据库实现前60%功能，可以参考demo中的实现，可以继续使用flask后端或者其他后端框架，需要通过fe/test/下已有的全部测试用例。
 
-
-书本的内容可自行构造一批，也可参从网盘下载，下载地址为：
-
-    https://pan.baidu.com/s/1bjCOW8Z5N_ClcqU54Pdt8g
-
-提取码：
-
-    hj6q
-    
 2.在完成前60%功能的基础上，继续实现后40%功能，要有接口、后端逻辑实现、数据库操作、代码测试。对所有接口都要写test case，通过测试并计算测试覆盖率（尽量提高测试覆盖率）。
 
-3.尽量使用索引，对程序与数据库执行的性能有考量
+3.尽量使用索引、事务处理等关系数据库特性，对程序与数据库执行的性能有考量
 
 4.尽量使用git等版本管理工具
 
-5.不需要实现界面，只需通过代码测试体现功能与正确性
+5.不需要实现界面，通过测试体现功能与正确性
 
 
 ## 报告内容
 
-1.每位组员的学号、姓名，以及分工
+1.详细规范记录实验过程
 
-2.文档数据库设计：文档schema
+2.关系数据库设计：概念设计、ER图、关系模式等
 
 3.对60%基础功能和40%附加功能的接口、后端逻辑、数据库操作、测试用例进行介绍，展示测试结果与测试覆盖率。
 
@@ -124,15 +135,31 @@ bookstore
 
 ## 验收与考核准测
 
-- 提交 **代码+报告** 压缩包到 **作业提交入口**
-- 命名规则：2023_SJTU_PJ1_第几组(.zip)
-- 提交截止日期：**2023.4.22 23:59**
+- 提交 **代码+报告** 压缩包发送邮件 **51255903087@stu.ecnu.edu.cn** ，命名规则：学号_姓名_PJ2.zip
+- 提交截止日期：**2023.06.10 23:59**
 
-考核标准：
+本次大作业不需要提交演示视频，验收的依据是报告：
 
 1. 没有提交或没有实质的工作，得D
-2. 完成"要求"中的第点，可得C
-3. 完成前3点，通过全部测试用例且有较高的测试覆盖率，可得B
-4. 完成前2点的基础上，体现出第3 4点，可得A
-5. 以上均为参考，最后等级会根据最终的工作质量有所调整
+2. 完成"要求"中的第1点，可得C
+3. 完成前2点，通过全部测试用例且有较高的测试覆盖率，可得B
+4. 完成前2点的基础上，体现出第3中的亮点（尤其是事务处理），可得A。
 
+
+## 附加任务
+
+不做本次考核要求 
+
+学有余力的同学可以尝试下述内容，可以写在报告里：
+
+更多的数据 book_lx.db 可以从网盘下载，下载地址为：
+
+    https://pan.baidu.com/s/1bjCOW8Z5N_ClcqU54Pdt8g
+
+提取码：
+
+    hj6q
+    
+这份数据同bookstore/fe/data/book.db的schema相同，但是有更多的数据(约3.5GB, 40000+行)
+
+可以将book_lx.db导入到数据库中，利用fe/bench/进行压力测试，得到吞吐量与延迟性能数据。

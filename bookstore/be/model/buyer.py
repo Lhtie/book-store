@@ -1,11 +1,12 @@
-from pymongo import MongoClient
 import uuid
 import json
 import logging
+from be.model import store
 from be.model import error
 from be.model import db_conn
 from be.model.times import get_now_time, add_unpaid_order, delete_unpaid_order, check_order_time
 from be.model.order import Order
+from sqlalchemy import func
 
 class Buyer(db_conn.DBConn):
     def __init__(self):
@@ -24,28 +25,36 @@ class Buyer(db_conn.DBConn):
             # computer the order's total price, and update the database
             total_price = 0
             for book_id, count in id_and_count:
-                row = self.mongodb.store.find_one({"store_id": store_id, "book_id": book_id})
+                session = self.db.DbSession()
+                row = session.query(store.Store_Table).filter_by(store_id=store_id, book_id=book_id).first()
                 if row is None:
+                    session.close()
                     return error.error_non_exist_book_id(book_id) + (order_id,)
 
-                stock_level = row["stock_level"]
-                book_info = row["book_info"]
+                stock_level = row.stock_level
+                book_info = row.book_info
                 book_info_json = json.loads(book_info)
                 price = book_info_json.get("price")
 
                 if stock_level < count:
+                    session.close()
                     return error.error_stock_level_low(book_id) + (order_id,)
 
-                self.mongodb.store.update_one({"store_id": store_id, "book_id": book_id},
-                                               {"$inc": {"stock_level": -count}})
-                self.mongodb.new_order_detail.insert_one({"order_id": uid, "book_id": book_id,
-                                                          "count": count, "price": price})
+                row.stock_level -= count
+                session.add(row)
+                session.commit()
+                session.close()
+                
+                new_order_detail = store.New_Order_Detail_Table(order_id=uid, book_id=book_id, count=count, price=price)
+                self.db.insert(new_order_detail)
                 
                 total_price += count * price
 
             order_time = get_now_time()
-            self.mongodb.new_order.insert_one(
-                {"order_id": uid, "store_id": store_id, "user_id": user_id, "status": 1, "total_price": total_price, "order_time": order_time})
+            new_order = store.New_Order_Table(order_id=uid, store_id=store_id, user_id=user_id, 
+                                              status=1, total_price=total_price, order_time=order_time)
+            self.db.insert(new_order)
+
             order_id = uid
             add_unpaid_order(order_id, order_time)
 
@@ -56,14 +65,16 @@ class Buyer(db_conn.DBConn):
 
     def payment(self, user_id: str, password: str, order_id: str) -> (int, str):
         try:
-            row = self.mongodb.new_order.find_one({"order_id": order_id})
+            session = self.db.DbSession()
+            row = session.query(store.New_Order_Table).filter_by(order_id=order_id).first()
+            session.close()
             if row is None:
                 return error.error_invalid_order_id(order_id)
 
-            buyer_id = row["user_id"]
-            status = row["status"]
-            total_price = row["total_price"]
-            order_time = row["order_time"]
+            buyer_id = row.user_id
+            status = row.status
+            total_price = row.total_price
+            order_time = row.order_time
 
             if buyer_id != user_id:
                 return error.error_authorization_fail()
@@ -76,19 +87,26 @@ class Buyer(db_conn.DBConn):
                 order.cancel_order(order_id, end_status=0)
                 return error.error_invalid_order_id
 
-            row = self.mongodb.user.find_one({"user_id": buyer_id})
+            session = self.db.DbSession()
+            row = session.query(store.User_Table).filter_by(user_id=buyer_id).first()
             if row is None:
+                session.close()
                 return error.error_non_exist_user_id(buyer_id)
-            balance = row["balance"]
-            if password != row["password"]:
+            balance = row.balance
+            if password != row.password:
+                session.close()
                 return error.error_authorization_fail()
             
             if balance < total_price:
+                session.close()
                 return error.error_not_sufficient_funds(order_id)
 
-            self.mongodb.user.update_one({"user_id": buyer_id, "balance": {"$gte": total_price}},
-                                         {"$inc": {"balance": -total_price}})
-            self.mongodb.new_order.update_one({"order_id": order_id}, {"$set":{"status": 2}})
+            row.balance -= total_price
+            session.add(row)
+            session.query(store.New_Order_Table).filter_by(order_id=order_id).update({'status': 2})
+
+            session.commit()
+            session.close()
             delete_unpaid_order(order_id)
 
         except Exception as e:
@@ -98,15 +116,20 @@ class Buyer(db_conn.DBConn):
 
     def add_funds(self, user_id: str, password: str, add_value: str) -> (int, str):
         try:
-            row = self.mongodb.user.find_one({"user_id": user_id})
+            session = self.db.DbSession()
+            row = session.query(store.User_Table).filter_by(user_id=user_id).first()
             if row is None:
+                session.close()
                 return error.error_authorization_fail()
 
-            if row["password"] != password:
+            if row.password != password:
+                session.close()
                 return error.error_authorization_fail()
 
-            self.mongodb.user.update_one({"user_id": user_id},
-                                         {"$inc": {"balance": add_value}})
+            row.balance += add_value
+            session.add(row)
+            session.commit()
+            session.close()
 
         except Exception as e:
             return 528, "{}".format(str(e))
@@ -118,36 +141,45 @@ class Buyer(db_conn.DBConn):
             if not self.user_id_exist(user_id):
                 return error.error_non_exist_user_id(user_id)
 
-            row = self.mongodb.new_order.find_one({"order_id": order_id})
+            session = self.db.DbSession()
+            row = session.query(store.New_Order_Table).filter_by(order_id=order_id).first()
+            session.close()
             if row is None:
                 return error.error_invalid_order_id(order_id)
 
-            order_id = row["order_id"]
-            buyer_id = row["user_id"]
-            store_id = row["store_id"]
-            status = row["status"]
-            total_price = row["total_price"]
+            order_id = row.order_id
+            buyer_id = row.user_id
+            store_id = row.store_id
+            status = row.status
+            total_price = row.total_price
 
             if buyer_id != user_id:
                 return error.error_authorization_fail()
             if status != 3:
                 return error.error_invalid_order_status(order_id)
             
-            row = self.mongodb.user.find_one({"user_id": buyer_id})
+            session = self.db.DbSession()
+            row = session.query(store.User_Table).filter_by(user_id=buyer_id).first()
+            session.close()
             if row is None:
                 return error.error_non_exist_user_id(buyer_id)
-            if password != row["password"]:
+            if password != row.password:
                 return error.error_authorization_fail()
 
-            row = self.mongodb.user_store.find_one({"store_id": store_id})
+            session = self.db.DbSession()
+            row = session.query(store.User_Store_Table).filter_by(store_id=store_id).first()
+            session.close()
             if row is None:
                 return error.error_non_exist_store_id(store_id)
-            seller_id = row["user_id"]
+            seller_id = row.user_id
             if not self.user_id_exist(seller_id):
                 return error.error_non_exist_user_id(seller_id)
             
-            self.mongodb.user.update_one({"user_id": seller_id},
-                                         {"$inc": {"balance": total_price}})
+            session = self.db.DbSession()
+            row = session.query(store.User_Table).filter_by(user_id=seller_id).first()
+            row.balance += total_price
+            session.commit()
+            session.close()
             
             order = Order()
             order.cancel_order(order_id, end_status=4)
@@ -157,11 +189,13 @@ class Buyer(db_conn.DBConn):
 
     def cancel_order(self, buyer_id, order_id) -> (int, str):
         try:
-            row = self.mongodb.new_order.find_one({"order_id": order_id})
+            session = self.db.DbSession()
+            row = session.query(store.New_Order_Table).filter_by(order_id=order_id).first()
+            session.close()
             if row is None:
                 return error.error_invalid_order_id(order_id)
             
-            if row["status"] != 1:  # we can just cancel the order if the order is unpaid.
+            if row.status != 1:  # we can just cancel the order if the order is unpaid.
                 return error.error_invalid_order_status(order_id)
 
             if not self.user_id_exist(buyer_id):
@@ -180,57 +214,78 @@ class Buyer(db_conn.DBConn):
             if not self.user_id_exist(user_id):
                 raise error.error_non_exist_user_id(user_id)
 
-            result = []
-            cursor = self.mongodb.new_order.find({"user_id": user_id})
+            session = self.db.DbSession()
+            cursor = session.query(store.New_Order_Table).filter_by(user_id=user_id).all()
+            session.close()
+            results = []
             if len(list(cursor)) != 0:
                 for row in cursor:
                     order = {
-                        "order_id": row["order_id"],
-                        "store_id": row["store_id"],
-                        "status": row["status"],
-                        "total_price": row["total_price"], 
-                        "order_time": row["order_time"]
+                        "order_id": row.order_id,
+                        "store_id": row.store_id,
+                        "status": row.status,
+                        "total_price": row.total_price, 
+                        "order_time": row.order_time
                     }
                     books = []
-                    bookrows = self.mongodb.new_order_detail.find({"order_id": order["order_id"]})
+                    session = self.db.DbSession()
+                    bookrows = session.query(store.New_Order_Detail_Table).filter_by(order_id=order["order_id"]).all()
+                    session.close()
                     for bookrow in bookrows:
                         book = {
-                            "book_id": bookrow["book_id"],
-                            "count": bookrow["count"]
+                            "book_id": bookrow.book_id,
+                            "count": bookrow.count
                         }
                         books.append(book)
                     order["books"] = books
-                    result.append(order)
+                    results.append(order)
             else:
-                result = ["NO Order is Processing"]
+                results = ["NO Order is Processing"]
         except BaseException as e:
             return 530, "{}".format(str(e)), []
-        return 200, "ok", result
+        return 200, "ok", results
     
     def query_history_order(self, user_id):
         try:
             if not self.user_id_exist(user_id):
                 raise error.error_non_exist_user_id(user_id)
 
-            result = []
-            orders = self.mongodb.history_order.find({'user_id': user_id},{'_id':0})
+            results = []
+            session = self.db.DbSession()
+            orders = session.query(store.History_Order_Table).filter_by(user_id=user_id).all()
             for order in orders:
-                result.append(order)
+                result = dict(
+                    order_id=order.order_id,
+                    user_id=order.user_id,
+                    store_id=order.store_id,
+                    total_price=order.total_price,
+                    status=order.status,
+                    order_time=order.order_time
+                )
+                books = session.query(func.array_agg(store.History_Order_Books_Table.book_id), 
+                                      func.array_agg(store.History_Order_Books_Table.count))\
+                    .filter_by(order_id=order.order_id)\
+                    .group_by(store.History_Order_Books_Table.order_id).first()
+                result["books"] = [dict(book_id=x, count=y) for x, y in zip(books[0], books[1])]
+                results.append(result)
 
         except BaseException as e:
+            print(str(e))
             return 530, "{}".format(str(e)), []
-        return 200, "ok", result
+        return 200, "ok", results
     
     # store_id: if not None, retrieve books stored in store_id
     def __find_one_key(self, key: str, store_id: str=None) -> (int, str, set):
         try:
+            session = self.db.DbSession()
             if store_id is None:
-                row = self.mongodb.inverted_index.find({"key_ctx": key})
+                row = session.query(store.Inverted_Index_Table).filter_by(key_ctx=key).all()
             else:
-                row = self.mongodb.inverted_index.find({"key_ctx": key, "store_id": store_id})
+                row = session.query(store.Inverted_Index_Table).filter_by(key_ctx=key, store_id=store_id).all()
+            session.close()
             book_ids = []
             for each in row:
-                book_ids.append(each["book_id"])
+                book_ids.append(each.book_id)
 
         except Exception as e:
             return 528, "{}".format(str(e)), set()
@@ -264,11 +319,13 @@ class Buyer(db_conn.DBConn):
                 raise error.error_and_message(code, msg)
 
             book_infos = []
+            session = self.db.DbSession()
             for book_id in book_ids:
-                row = self.mongodb.store.find_one({"book_id": book_id})
+                row = session.query(store.Store_Table).filter_by(book_id=book_id).first()
                 if row is None:
                     raise error.error_non_exist_book_id(book_id)
-                book_infos.append(json.loads(row["book_info"]))
+                book_infos.append(json.loads(row.book_info))
+            session.close()
 
         except Exception as e:
             return 528, "{}".format(str(e)), []
@@ -285,11 +342,12 @@ class Buyer(db_conn.DBConn):
                 raise error.error_and_message(code, msg)
 
             book_infos = []
+            session = self.db.DbSession()
             for book_id in book_ids:
-                row = self.mongodb.store.find_one({"store_id": store_id, "book_id": book_id})
+                row = session.query(store.Store_Table).filter_by(store_id=store_id, book_id=book_id).first()
                 if row is None:
                     raise error.error_non_exist_book_id(book_id)
-                book_infos.append(json.loads(row["book_info"]).update(stock_level=row["stock_level"]))
+                book_infos.append(json.loads(row.book_info).update(stock_level=row.stock_level))
 
         except Exception as e:
             return 528, "{}".format(str(e)), []
